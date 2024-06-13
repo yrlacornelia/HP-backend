@@ -1,5 +1,9 @@
 package com.example.hpbackend.controller;
 
+import com.example.hpbackend.entity.User;
+import com.example.hpbackend.repositories.UserRepository;
+import com.example.hpbackend.service.AuthService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,13 +14,61 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.stream.Collectors;
+import java.util.List;
 
 @RestController
 public class LoginController {
 
     @Autowired
     private AuthenticationManager authenticationManager;
+    private final UserRepository userRepository;
+    private final AuthService authService;
+    private final JwtTokenProvider jwtTokenProvider;
+
+    @Autowired
+    public LoginController(UserRepository userRepository, AuthService authService, JwtTokenProvider jwtTokenProvider) {
+        this.userRepository = userRepository;
+        this.authService = authService;
+        this.jwtTokenProvider = jwtTokenProvider;
+    }
+
+    public static record LoginRequest(String username, String password) {
+    }
+
+    public static record LoginResponse(String token, String username) {
+    }
+
+    @GetMapping("/currentuser")
+    public ResponseEntity<String> getCurrentUser(HttpServletRequest request) {
+        String token = request.getHeader("Authorization");
+        if (token != null && token.startsWith("Bearer ")) {
+            token = token.substring(7); // Remove "Bearer " prefix
+        }
+
+        if (jwtTokenProvider.validateToken(token)) {
+            String username = jwtTokenProvider.getUsernameFromJWT(token);
+            String role = String.valueOf(jwtTokenProvider.getRolesFromJWT(token));
+            return ResponseEntity.ok().body("Token is valid. Current user: " + username + role);
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token is not valid");
+        }
+    }
+
+    @GetMapping(value = "/username")
+    public String currentUserName(Authentication authentication) {
+        return authentication.getName();
+    }
+
+    @GetMapping("/allusers")
+    public ResponseEntity<List<User>> getAllUsers() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated()) {
+            List<User> users = userRepository.findAll();
+            return ResponseEntity.ok().body(users);
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+    }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
@@ -26,39 +78,14 @@ public class LoginController {
             Authentication authenticationResponse =
                     this.authenticationManager.authenticate(authenticationRequest);
 
-            // Set the authentication in the SecurityContext
             SecurityContextHolder.getContext().setAuthentication(authenticationResponse);
-
-            // Retrieve the roles from the Authentication object
-            String roles = authenticationResponse.getAuthorities().stream()
-                    .map(authority -> authority.getAuthority())
-                    .collect(Collectors.joining(", "));
-
-            // Example token: using username as a token (for demonstration purposes)
-            String token = authenticationResponse.getName();
-
-            // Create a response that includes the token and roles
-            LoginResponse loginResponse = new LoginResponse(token, roles);
+            String token = jwtTokenProvider.generateToken(authenticationResponse);
+            String username = authenticationResponse.getName();
+            LoginResponse loginResponse = new LoginResponse(token, username);
 
             return ResponseEntity.ok().body(loginResponse);
         } catch (AuthenticationException e) {
-            // Authentication failed
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authentication failed");
-        }
-    }
-
-    public record LoginRequest(String username, String password) {
-    }
-
-    public record LoginResponse(String token, String roles) {
-    }
-    @GetMapping("/currentuser")
-    public ResponseEntity<String> getCurrentUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.isAuthenticated()) {
-            return ResponseEntity.ok().body("Current user: " + authentication.getName());
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No authenticated user found");
         }
     }
 }

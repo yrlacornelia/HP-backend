@@ -25,8 +25,4 @@ public class TestLoginController {
     public String user() {
         return "Welcome, authenticated user!";
     }
-    @GetMapping("/allusers")
-    List<User> userList() {
-        return userRepository.findAll();
-    }
 }

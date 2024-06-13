@@ -19,15 +19,15 @@ public class User implements Serializable {
     private Long id;
 
     @Getter
-    private String userName;
+    private String username;
     private String password;
 
     public User() {
     }
 
-    public User(Long id, String userName, String password) {
+    public User(Long id, String username, String password) {
         this.id = id;
-        this.userName = userName;
+        this.username = username;
         this.password = password;
     }
 
@@ -43,7 +43,7 @@ public class User implements Serializable {
         this.id = id;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public void setUserName(String username) {
+        this.username = username;
     }
 }
