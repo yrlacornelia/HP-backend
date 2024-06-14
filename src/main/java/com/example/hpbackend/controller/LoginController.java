@@ -42,22 +42,20 @@ public class LoginController {
     public ResponseEntity<String> getCurrentUser(HttpServletRequest request) {
         String token = request.getHeader("Authorization");
         if (token != null && token.startsWith("Bearer ")) {
-            token = token.substring(7); // Remove "Bearer " prefix
+            token = token.substring(7);
         }
 
         if (jwtTokenProvider.validateToken(token)) {
             String username = jwtTokenProvider.getUsernameFromJWT(token);
             String role = String.valueOf(jwtTokenProvider.getRolesFromJWT(token));
-            return ResponseEntity.ok().body("Token is valid. Current user: " + username + role);
+
+            String usernamee = authService.getCurrentUsername();
+            return ResponseEntity.ok().body("Token is valid. Current user: " + username + role + usernamee);
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token is not valid");
         }
     }
 
-    @GetMapping(value = "/username")
-    public String currentUserName(Authentication authentication) {
-        return authentication.getName();
-    }
 
     @GetMapping("/allusers")
     public ResponseEntity<List<User>> getAllUsers() {

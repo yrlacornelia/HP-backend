@@ -19,7 +19,7 @@ public class JwtTokenProvider {
 
     private static final SecretKey SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS512);
 
-    private static final long EXPIRATION_TIME = 864_000_000; // 10 days in milliseconds
+    private static final long EXPIRATION_TIME = 864_000_000;
 
     public String generateToken(Authentication authentication) {
         String username = authentication.getName();
