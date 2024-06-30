@@ -60,6 +60,7 @@ public class JwtTokenProvider {
         Claims claims = extractClaims(token);
         return claims.getSubject();
     }
+
     public List<String> getRolesFromJWT(String token) {
         Claims claims = extractClaims(token);
         String roles = claims.get("roles", String.class);

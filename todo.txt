@@ -1,1 +1,57 @@
-how to login
+controllers
+börja med user profile etc
+user:
+user image
+username
+name
+password
+house ( key to this (many to one? )
+
+house:
+name:
+
+
+chat:
+
+
+
+
+admin ( jag är admin tills slutet)
+
+
+frågor:
+why serialization
+
+
+todo:
+settings:
+uppdatera profileimage password och username
+
+
+
+@GetMapping("/userSettings")
+    public ResponseEntity<User> userPage() {
+        String username = authService.getCurrentUsername();
+        User user = userRepository.findByUsername(username);
+/*        String base64Image;
+        if(user.getImageData() != null) {
+            base64Image = Base64.getEncoder().encodeToString(user.getImageData());
+        }
+        else {
+            try {
+                Path imagePath = Path.of(resourceLoader.getResource("classpath:images/profile.jpeg").getURI());
+                System.out.println(Arrays.toString(Files.readAllBytes(imagePath)));
+                user.setImageData(Files.readAllBytes(imagePath));
+                base64Image = Base64.getEncoder().encodeToString(user.getImageData());
+            } catch (IOException e) {
+                e.printStackTrace();
+
+                return null;
+            }
+        }*/
+    /*    Map<String, Object> response = new HashMap<>();
+        response.put("user", user);
+        response.put("imageData", base64Image);
+*/
+        return ResponseEntity.ok().body(user);
+    }

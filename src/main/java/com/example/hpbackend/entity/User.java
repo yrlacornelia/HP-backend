@@ -1,10 +1,9 @@
 package com.example.hpbackend.entity;
 
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,6 +12,7 @@ import java.io.Serializable;
 @Getter
 @Setter
 @Entity
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class User implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,8 +20,17 @@ public class User implements Serializable {
 
     @Getter
     private String username;
+    @Getter
     private String password;
 
+    @Column(name = "image_data")
+    @Lob
+    private byte[] imageData;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "house_id")
+    @JsonBackReference
+    private House house;
     public User() {
     }
 
@@ -31,17 +40,10 @@ public class User implements Serializable {
         this.password = password;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
     public void setPassword(String password) {
         this.password = password;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     public void setUserName(String username) {
         this.username = username;
