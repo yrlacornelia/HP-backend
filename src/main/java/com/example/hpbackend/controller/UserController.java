@@ -1,5 +1,6 @@
 package com.example.hpbackend.controller;
 
+import com.example.hpbackend.config.ImageUploader;
 import com.example.hpbackend.dtos.EditUserForm;
 import com.example.hpbackend.repositories.UserRepository;
 import com.example.hpbackend.entity.User;
@@ -27,9 +28,11 @@ public class UserController {
 
     private final AuthService authService;
     private final JwtTokenProvider jwtTokenProvider;
+    ImageUploader imageUploader;
 
-    public UserController(UserRepository userRepository, ResourceLoader resourceLoader, AuthService authService, JwtTokenProvider jwtTokenProvider) {
+    public UserController(UserRepository userRepository, ImageUploader imageUploader, ResourceLoader resourceLoader, AuthService authService, JwtTokenProvider jwtTokenProvider) {
         this.userRepository = userRepository;
+        this.imageUploader = imageUploader;
         this.resourceLoader = resourceLoader;
         this.authService = authService;
         this.jwtTokenProvider = jwtTokenProvider;
@@ -43,6 +46,16 @@ public class UserController {
         return ResponseEntity.ok().body(hej);
     }
 
+    @PostMapping("/createNewPerson")
+    public ResponseEntity<Void> createUser(@RequestBody User user) {
+        if (user.getImageData() == null){
+            user.setImageData(imageUploader.uploadImage());
+        }
+        userRepository.save(user);
+        return ResponseEntity.noContent().build();
+    }
+
+
     @GetMapping("/userSettings")
     public ResponseEntity<?> userPage() {
         String username = authService.getCurrentUsername();
@@ -50,27 +63,7 @@ public class UserController {
         if (user == null) {
             return ResponseEntity.status(404).body("User not found");
         }
-        String base64Image;
-        if(user.getImageData() != null) {
-             base64Image = Base64.getEncoder().encodeToString(user.getImageData());
-        }
-        else {
-            try {
-                Path imagePath = Path.of(resourceLoader.getResource("classpath:images/profile.jpeg").getURI());
-                System.out.println(Arrays.toString(Files.readAllBytes(imagePath)));
-                user.setImageData(Files.readAllBytes(imagePath));
-                 base64Image = Base64.getEncoder().encodeToString(user.getImageData());
-            } catch (IOException e) {
-                e.printStackTrace();
-
-                return null;
-            }
-        }
-        Map<String, Object> response = new HashMap<>();
-        response.put("user", user);
-        response.put("imageData", base64Image);
-
-        return ResponseEntity.ok().body(user);
+        return ResponseEntity.ok(user);
     }
 
     @PostMapping("/userSettings")
@@ -97,6 +90,12 @@ public class UserController {
         userRepository.save(user);
         return ResponseEntity.ok(user);
     }
+
+    // in use
+    @GetMapping("/allusers")
+    List<User> userList() {
+        return userRepository.findAll();
+    }
 }
 
 
@@ -117,10 +116,7 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/allusers")
-    List<User> userList() {
-        return userRepository.findAll();
-    }
+
 
     @GetMapping("/user/{id}")
     Optional user(@PathVariable("id") Long id) {

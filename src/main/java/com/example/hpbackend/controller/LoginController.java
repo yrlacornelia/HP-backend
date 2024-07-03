@@ -38,8 +38,11 @@ public class LoginController {
     public static record LoginResponse(String token, String username) {
     }
 
+
+
+    // in use
     @GetMapping("/currentuser")
-    public ResponseEntity<User> getCurrentUser(HttpServletRequest request) {
+    public ResponseEntity<Object> getCurrentUser(HttpServletRequest request) {
         String token = request.getHeader("Authorization");
         if (token != null && token.startsWith("Bearer ")) {
             token = token.substring(7);
@@ -55,13 +58,14 @@ public class LoginController {
           // return ResponseEntity.ok().body("Token is valid. Current user: " + username + hello + usernamee);
             return ResponseEntity.ok().body(user);
 
-        } else {
-            return (ResponseEntity<User>) ResponseEntity.status(HttpStatus.UNAUTHORIZED);
+        }else {
+            // Return an error response with status 401 UNAUTHORIZED
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
         }
     }
 
 
-    @GetMapping("/allusers")
+/*    @GetMapping("/allusers")
     public ResponseEntity<List<User>> getAllUsers() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated()) {
@@ -70,8 +74,11 @@ public class LoginController {
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
-    }
+    }*
 
+ */
+
+    // in use
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         Authentication authenticationRequest =

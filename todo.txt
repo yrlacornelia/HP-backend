@@ -11,6 +11,7 @@ house:
 name:
 
 
+
 chat:
 
 
@@ -55,3 +56,9 @@ uppdatera profileimage password och username
 */
         return ResponseEntity.ok().body(user);
     }
+
+
+
+    cheatcheets
+
+    ALTER TABLE user MODIFY image_data LONGBLOB;
