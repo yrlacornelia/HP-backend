@@ -1,6 +1,10 @@
 controllers
 börja med user profile etc
 user:
+logga in x
+se sin info x
+byta info
+tailwind byta läge efter hus
 user image
 username
 name

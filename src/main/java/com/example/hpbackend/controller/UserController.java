@@ -56,15 +56,6 @@ public class UserController {
     }
 
 
-    @GetMapping("/userSettings")
-    public ResponseEntity<?> userPage() {
-        String username = authService.getCurrentUsername();
-        User user = userRepository.findByUsername(username);
-        if (user == null) {
-            return ResponseEntity.status(404).body("User not found");
-        }
-        return ResponseEntity.ok(user);
-    }
 
     @PostMapping("/userSettings")
     public ResponseEntity<?> editUser(@RequestBody EditUserForm userForm) {
@@ -86,7 +77,6 @@ public class UserController {
             return ResponseEntity.status(404).body("User not found");
         }
 
-        user.setImageData(file.getBytes());
         userRepository.save(user);
         return ResponseEntity.ok(user);
     }

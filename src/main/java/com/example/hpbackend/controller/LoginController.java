@@ -1,5 +1,6 @@
 package com.example.hpbackend.controller;
 
+import com.example.hpbackend.dtos.EditUserForm;
 import com.example.hpbackend.entity.User;
 import com.example.hpbackend.repositories.UserRepository;
 import com.example.hpbackend.service.AuthService;
@@ -13,10 +14,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:3000")
 public class LoginController {
 
     @Autowired
@@ -39,7 +43,18 @@ public class LoginController {
     }
 
 
-
+    @PostMapping("/userSettings")
+    public ResponseEntity<?> editUser(@RequestBody EditUserForm userForm, HttpServletRequest request) {
+        String token = request.getHeader("Authorization");
+        String username = authService.getCurrentUsername();
+        User user = userRepository.findByUsername(username);
+        if (user == null) {
+            return ResponseEntity.status(404).body("User not found");
+        }
+        user.setUserName(userForm.getUsername());
+        userRepository.save(user);
+        return ResponseEntity.ok(user);
+    }
     // in use
     @GetMapping("/currentuser")
     public ResponseEntity<Object> getCurrentUser(HttpServletRequest request) {
