@@ -40,36 +40,6 @@ public class TestLoginController {
 
     public static String UPLOAD_DIRECTORY = System.getProperty("user.dir") + "/uploads";
 
-    @GetMapping("/currentHouse")
-    public ResponseEntity<List<User>> getAllUsers() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.isAuthenticated()) {
-            List<User> users = userRepository.findAll();
-            return ResponseEntity.ok().body(users);
-
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-        }
-    }
-
-    @GetMapping("/userSettings")
-    public ResponseEntity<User> userPage() {
-        String username = authService.getCurrentUsername();
-        User user = userRepository.findByUsername(username);
-        return ResponseEntity.ok().body(user);
-    }
-
-    @PostMapping("/userSettins")
-    public ResponseEntity<?> editUser(@RequestBody EditUserForm userForm) {
-        String username = authService.getCurrentUsername();
-        User user = userRepository.findByUsername(username);
-        if (user == null) {
-            return ResponseEntity.status(404).body("User not found");
-        }
-        user.setUserName(userForm.getUsername());
-        userRepository.save(user);
-        return ResponseEntity.ok(user);
-    }
 
     @PostMapping("/uploadProfileImage")
     public ResponseEntity<?> uploadProfileImage(@RequestParam("image") MultipartFile file) throws IOException {

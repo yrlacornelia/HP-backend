@@ -42,7 +42,7 @@ public class LoginController {
     public static record LoginResponse(String token, String username) {
     }
 
-
+// in use
     @PostMapping("/userSettings")
     public ResponseEntity<?> editUser(@RequestBody EditUserForm userForm, HttpServletRequest request) {
         String token = request.getHeader("Authorization");
@@ -80,18 +80,6 @@ public class LoginController {
     }
 
 
-/*    @GetMapping("/allusers")
-    public ResponseEntity<List<User>> getAllUsers() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.isAuthenticated()) {
-            List<User> users = userRepository.findAll();
-            return ResponseEntity.ok().body(users);
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-        }
-    }*
-
- */
 
     // in use
     @PostMapping("/login")

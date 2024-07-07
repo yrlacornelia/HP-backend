@@ -46,7 +46,7 @@ public class SecurityConfig {
                 .addFilterBefore(corsFilter, AuthorizationFilter.class)
                 .addFilterBefore(new JwtAuthenticationFilter(authenticationManager(userDetailsService, passwordEncoder()), jwtTokenProvider, userDetailsService), UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/home", "/login", "/currentuser", "/**").permitAll()
+                        .requestMatchers("/home","/ws", "/login", "/currentuser", "/**").permitAll()
                         .anyRequest().hasRole("USER")
                 )
                 .httpBasic(Customizer.withDefaults())

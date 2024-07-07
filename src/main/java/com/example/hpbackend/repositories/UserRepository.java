@@ -9,6 +9,7 @@ import java.util.List;
 public interface UserRepository extends ListCrudRepository<User, Long> {
     User findByUsername(String username);
 
+
     List<User> findByHouseName(String houseName);
 
     String findByHouseId(House house);

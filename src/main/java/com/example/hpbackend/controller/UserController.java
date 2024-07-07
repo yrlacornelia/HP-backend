@@ -40,11 +40,7 @@ public class UserController {
 
  public static String UPLOAD_DIRECTORY = System.getProperty("user.dir") + "/uploads";
 
-    @GetMapping("/currentHouse")
-    public ResponseEntity<String> currentHouse() {
-        String hej = "hej";
-        return ResponseEntity.ok().body(hej);
-    }
+
 
     @PostMapping("/createNewPerson")
     public ResponseEntity<Void> createUser(@RequestBody User user) {
@@ -56,6 +52,15 @@ public class UserController {
     }
 
 
+    @GetMapping("/userSettings")
+    public ResponseEntity<?> userPage() {
+        String username = authService.getCurrentUsername();
+        User user = userRepository.findByUsername(username);
+        if (user == null) {
+            return ResponseEntity.status(404).body("User not found");
+        }
+        return ResponseEntity.ok(user);
+    }
 
     @PostMapping("/userSettings")
     public ResponseEntity<?> editUser(@RequestBody EditUserForm userForm) {

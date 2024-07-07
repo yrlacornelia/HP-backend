@@ -1,22 +1,26 @@
 controllers
+
+
+renskriva och få allt att funka
+
 börja med user profile etc
-user:
+user profile page:
 logga in x
 se sin info x
-byta info
+byta info x
 tailwind byta läge efter hus
-user image
-username
-name
-password
-house ( key to this (many to one? )
-
-house:
-name:
-
-
+user image x
+all info
+logga ut knapp
+lägga till logga in sida
 
 chat:
+renskriva
+göra chat entity
+man ska kunna chatta med varandra och man ska kunna chatta från olika rum
+
+
+shop:
 
 
 
@@ -66,3 +70,83 @@ uppdatera profileimage password och username
     cheatcheets
 
     ALTER TABLE user MODIFY image_data LONGBLOB;
+
+
+
+
+
+
+    USE chat_app;
+
+    CREATE TABLE users (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        username VARCHAR(50) NOT NULL UNIQUE,
+        password VARCHAR(255) NOT NULL,
+    );
+
+    CREATE TABLE messages (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        message TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+
+    CREATE TABLE chat_rooms (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        room_name VARCHAR(50) NOT NULL UNIQUE,
+    );
+
+    CREATE TABLE room_messages (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        room_id INT NOT NULL,
+        user_id INT NOT NULL,
+        message TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (room_id) REFERENCES chat_rooms(id) ON DELETE CASCADE,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+
+
+
+
+
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE messages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    sender_id INT NOT NULL,
+    receiver_id INT NOT NULL,
+    message TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE chat_rooms (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    room_name VARCHAR(50) NOT NULL UNIQUE
+);
+
+CREATE TABLE room_messages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    room_id INT NOT NULL,
+    user_id INT NOT NULL,
+    message TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (room_id) REFERENCES chat_rooms(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+
+
+user skickar ett meddelande
+
+
+
+
+https://spring.io/guides/gs/messaging-stomp-websocket
