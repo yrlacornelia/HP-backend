@@ -51,8 +51,13 @@ public class SecurityConfig {
                 )
                 .httpBasic(Customizer.withDefaults())
                 .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .securityContext(securityContext -> securityContext.requireExplicitSave(true));
-
+                .securityContext(securityContext -> securityContext.requireExplicitSave(true))
+                .logout(logout -> logout
+                        .logoutUrl("/logout") // URL to trigger logout
+                        .logoutSuccessHandler((request, response, authentication) -> {
+                            response.sendRedirect("/login");
+                        })
+                        .permitAll());
         return http.build();
     }
 

@@ -150,3 +150,15 @@ user skickar ett meddelande
 
 
 https://spring.io/guides/gs/messaging-stomp-websocket
+
+
+
+todo:
+byt frn jwt 
+renskriva
+lägga till alla fetches i en fil?
+logga in och logga ut sida klar - göra så man kommer till den först och inte kan röra annat innan
+lägga till fält att uppdatera sin profil
+fixa att lägga till bild
+fixa att inloggad person är den som skriver meddelandet
+fixa att skriva meddelande från det stället
