@@ -154,7 +154,9 @@ https://spring.io/guides/gs/messaging-stomp-websocket
 
 
 todo:
-byt frn jwt 
+byt frn jwt xxxx
+log in log out smidigare
+inte bugga om man byter namn
 renskriva
 lägga till alla fetches i en fil?
 logga in och logga ut sida klar - göra så man kommer till den först och inte kan röra annat innan
@@ -165,6 +167,66 @@ fixa att skriva meddelande från det stället
 
 
 18.00 promme
-19.00 middag
-duscha
+19.00 duscha
+käka
 20.00 film
+{
+
+    private final SecurityContextHolderStrategy securityContextHolderStrategy = SecurityContextHolder.getContextHolderStrategy();
+    private final AuthenticationManager authenticationManager;
+    private final UserRepository userRepository;
+    private final AuthService authService;
+    private final SecurityContextRepository securityContextRepository = new HttpSessionSecurityContextRepository();
+
+    public LoginController(UserRepository userRepository, AuthService authService, AuthenticationManager authenticationManager) {
+        this.userRepository = userRepository;
+        this.authService = authService;
+        this.authenticationManager = authenticationManager;
+    }
+
+    @PostMapping("/logins")
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request, HttpServletResponse response) {
+        System.out.println("Received login request for username: " + loginRequest.username()); // Debug log
+
+        try {
+            UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(loginRequest.username(), loginRequest.password());
+            Authentication authentication = authenticationManager.authenticate(token);
+
+            SecurityContext context = securityContextHolderStrategy.createEmptyContext();
+            context.setAuthentication(authentication);
+            securityContextHolderStrategy.setContext(context);
+            securityContextRepository.saveContext(context, request, response);
+
+            Authentication authenticationResponse = SecurityContextHolder.getContext().getAuthentication();
+            if (authenticationResponse != null && authenticationResponse.isAuthenticated()) {
+                String username = authenticationResponse.getName();
+                return ResponseEntity.ok(new LoginResponse(username));
+            } else {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+            }
+        } catch (AuthenticationException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+    }
+
+
+
+    public static class LoginResponse {
+        private String username;
+
+        public LoginResponse(String username) {
+            this.username = username;
+        }
+
+        public String getUsername() {
+            return username;
+        }
+
+        public void setUsername(String username) {
+            this.username = username;
+        }
+    }
+
+    public static record LoginRequest(String username, String password) {
+    }
+}

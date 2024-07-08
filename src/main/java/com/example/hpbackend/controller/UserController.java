@@ -65,7 +65,11 @@ public class UserController {
 
     @PostMapping("/userSettings")
     public ResponseEntity<?> editUser(@RequestBody EditUserForm userForm) {
-        String username = authService.getCurrentUser();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No user is currently logged in");
+        }
+        String username = authentication.getName();
         User user = userRepository.findByUsername(username);
         if (user == null) {
             return ResponseEntity.status(404).body("User not found");
@@ -87,19 +91,22 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
     @GetMapping("/currentuser")
-    public ResponseEntity<String> getCurrentUser(HttpServletRequest request) {
-        String token = request.getHeader("Authorization");
-        System.out.println(token);
+    public  ResponseEntity<Object>  getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No user is currently logged in");
         }
         String username = authentication.getName();
         System.out.println(authentication.getName());
-        return ResponseEntity.ok().body("Current logged-in user: " + username);
-
+        User user = userRepository.findByUsername(username);
+        return ResponseEntity.ok().body(user);
 
     }
+
+
+
+
+
     // in use
     @GetMapping("/allusers")
     List<User> userList() {
