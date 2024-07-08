@@ -4,7 +4,7 @@ import com.example.hpbackend.entity.ChatMessage;
 import com.example.hpbackend.entity.User;
 import com.example.hpbackend.repositories.ChatMessageRepository;
 import com.example.hpbackend.repositories.UserRepository;
-import com.example.hpbackend.service.AuthService;
+import com.example.hpbackend.services.AuthService;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -42,7 +42,7 @@ public class ChatController {
         // behöver token
      // Optional<User> user = Optional.ofNullable(userService.findByUsername(chatMessage.getSender().getUsername()));
     //    Optional<User> user = Optional.ofNullable(userService.findByUsername("hej"));
-        String username = authService.getCurrentUsername();
+        String username = authService.getCurrentUser();
         System.out.println(username);
         Optional<User> user = Optional.ofNullable(userService.findByUsername("hej"));
         user.ifPresent(chatMessage::setSender);

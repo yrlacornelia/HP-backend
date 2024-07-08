@@ -1,67 +1,71 @@
 package com.example.hpbackend.config;
 
-import com.example.hpbackend.controller.JwtTokenProvider;
-import com.example.hpbackend.repositories.UserRepository;
-import jakarta.servlet.http.HttpSession;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
-import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.ProviderManager;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.access.intercept.AuthorizationFilter;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.filter.CorsFilter;
+        import com.example.hpbackend.repositories.UserRepository;
+        import org.springframework.beans.factory.annotation.Autowired;
+        import org.springframework.context.annotation.Bean;
+        import org.springframework.context.annotation.Configuration;
+        import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+        import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
+        import org.springframework.security.authentication.AuthenticationManager;
+        import org.springframework.security.authentication.ProviderManager;
+        import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+        import org.springframework.security.config.Customizer;
+        import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+        import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+        import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+        import org.springframework.security.config.http.SessionCreationPolicy;
+        import org.springframework.security.core.userdetails.User;
+        import org.springframework.security.core.userdetails.UserDetailsService;
+        import org.springframework.security.core.userdetails.UsernameNotFoundException;
+        import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+        import org.springframework.security.crypto.password.PasswordEncoder;
+        import org.springframework.security.web.SecurityFilterChain;
+        import org.springframework.web.cors.CorsConfiguration;
+        import org.springframework.web.cors.CorsConfigurationSource;
+        import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+        import java.util.List;
 
-@Configuration
 @EnableWebSecurity
+@Configuration
 public class SecurityConfig {
 
-    private final CorsFilter corsFilter;
+
     private final UserRepository userRepository;
 
     @Autowired
-    public SecurityConfig(CorsFilter corsFilter, UserRepository userRepository) {
-        this.corsFilter = corsFilter;
+    public SecurityConfig( UserRepository userRepository) {
+
         this.userRepository = userRepository;
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtTokenProvider jwtTokenProvider, UserDetailsService userDetailsService) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .cors(httpSecurityCorsConfigurer -> httpSecurityCorsConfigurer.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
-                .addFilterBefore(corsFilter, AuthorizationFilter.class)
-                .addFilterBefore(new JwtAuthenticationFilter(authenticationManager(userDetailsService, passwordEncoder()), jwtTokenProvider, userDetailsService), UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/home","/ws", "/login", "/currentuser", "/**").permitAll()
-                        .anyRequest().hasRole("USER")
+                        .requestMatchers("/home","/ws", "/login",  "/**").permitAll()
+                        .anyRequest().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults())
-                .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .securityContext(securityContext -> securityContext.requireExplicitSave(true))
-                .logout(logout -> logout
-                        .logoutUrl("/logout") // URL to trigger logout
-                        .logoutSuccessHandler((request, response, authentication) -> {
-                            response.sendRedirect("/login");
-                        })
-                        .permitAll());
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                );
         return http.build();
     }
 
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration corsConfiguration = new CorsConfiguration();
+        corsConfiguration.setAllowedOrigins(List.of("http://localhost:3000"));
+        corsConfiguration.setAllowedMethods(List.of("GET", "POST"));
+        corsConfiguration.setAllowCredentials(true);
+        corsConfiguration.setAllowedHeaders(List.of("*"));
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", corsConfiguration);
+        return source;
 
+    }
     @Bean
     public AuthenticationManager authenticationManager(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();

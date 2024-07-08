@@ -1,24 +1,17 @@
 package com.example.hpbackend.controller;
 
 
-import com.example.hpbackend.dtos.EditUserForm;
 import com.example.hpbackend.entity.User;
 import com.example.hpbackend.repositories.UserRepository;
-import com.example.hpbackend.service.AuthService;
+import com.example.hpbackend.services.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.*;
 
 @RestController
 public class TestLoginController {
@@ -29,13 +22,11 @@ public class TestLoginController {
     private final ResourceLoader resourceLoader;
 
     private final AuthService authService;
-    private final JwtTokenProvider jwtTokenProvider;
 
-    public TestLoginController(UserRepository userRepository, ResourceLoader resourceLoader, AuthService authService, JwtTokenProvider jwtTokenProvider) {
+    public TestLoginController(UserRepository userRepository, ResourceLoader resourceLoader, AuthService authService) {
         this.userRepository = userRepository;
         this.resourceLoader = resourceLoader;
         this.authService = authService;
-        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     public static String UPLOAD_DIRECTORY = System.getProperty("user.dir") + "/uploads";
@@ -43,7 +34,7 @@ public class TestLoginController {
 
     @PostMapping("/uploadProfileImage")
     public ResponseEntity<?> uploadProfileImage(@RequestParam("image") MultipartFile file) throws IOException {
-        String username = authService.getCurrentUsername();
+        String username = authService.getCurrentUser();
         User user = userRepository.findByUsername(username);
         if (user == null) {
             return ResponseEntity.status(404).body("User not found");

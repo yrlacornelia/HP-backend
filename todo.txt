@@ -162,3 +162,9 @@ lägga till fält att uppdatera sin profil
 fixa att lägga till bild
 fixa att inloggad person är den som skriver meddelandet
 fixa att skriva meddelande från det stället
+
+
+18.00 promme
+19.00 middag
+duscha
+20.00 film
