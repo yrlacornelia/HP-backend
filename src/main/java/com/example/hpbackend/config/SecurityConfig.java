@@ -12,7 +12,6 @@ package com.example.hpbackend.config;
         import org.springframework.security.config.Customizer;
         import org.springframework.security.config.annotation.web.builders.HttpSecurity;
         import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-        import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
         import org.springframework.security.config.http.SessionCreationPolicy;
         import org.springframework.security.core.userdetails.User;
         import org.springframework.security.core.userdetails.UserDetailsService;
@@ -20,6 +19,8 @@ package com.example.hpbackend.config;
         import org.springframework.security.crypto.factory.PasswordEncoderFactories;
         import org.springframework.security.crypto.password.PasswordEncoder;
         import org.springframework.security.web.SecurityFilterChain;
+        import org.springframework.security.web.csrf.CsrfTokenRepository;
+        import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
         import org.springframework.web.cors.CorsConfiguration;
         import org.springframework.web.cors.CorsConfigurationSource;
         import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -29,12 +30,10 @@ package com.example.hpbackend.config;
 @Configuration
 public class SecurityConfig {
 
-
     private final UserRepository userRepository;
 
     @Autowired
-    public SecurityConfig( UserRepository userRepository) {
-
+    public SecurityConfig(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
@@ -42,16 +41,25 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .cors(httpSecurityCorsConfigurer -> httpSecurityCorsConfigurer.configurationSource(corsConfigurationSource()))
-                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/home","/ws", "/login",  "/**").permitAll()
+                        .requestMatchers("/home","/ws", "/login","/csrf-token", "/logout", "/**").permitAll()
                         .anyRequest().authenticated()
+                )
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .permitAll()
                 )
                 .httpBasic(Customizer.withDefaults())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                 )
-                .logout((logout) -> logout.logoutSuccessUrl("/home"));
+                .logout(logout -> logout
+                        .logoutUrl("/logout") // Specify the logout URL
+                        .logoutSuccessUrl("/home") // Redirect URL after successful logout
+                        .invalidateHttpSession(true) // Invalidate the session
+                        .deleteCookies("JSESSIONID") // Delete cookies
+                );
+
         return http.build();
     }
 
@@ -59,28 +67,30 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         corsConfiguration.setAllowedOrigins(List.of("http://localhost:3000"));
-        corsConfiguration.setAllowedMethods(List.of("GET", "POST"));
+        corsConfiguration.setAllowedMethods(List.of("GET", "POST", "OPTIONS"));
         corsConfiguration.setAllowCredentials(true);
         corsConfiguration.setAllowedHeaders(List.of("*"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", corsConfiguration);
         return source;
-
     }
+
     @Bean
     public AuthenticationManager authenticationManager(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
+        System.out.println(authenticationProvider);
         authenticationProvider.setUserDetailsService(userDetailsService);
         authenticationProvider.setPasswordEncoder(passwordEncoder);
-
         return new ProviderManager(authenticationProvider);
     }
 
     @Bean
     public UserDetailsService userDetailsService() {
         return username -> {
+            System.out.println("Attempting to load user: " + username); // Debug log
             com.example.hpbackend.entity.User user = userRepository.findByUsername(username);
             if (user != null) {
+                System.out.println("User found: " + user.getUsername()); // Debug log
                 return User.withUsername(user.getUsername())
                         .password("{noop}" + user.getPassword())
                         .roles("USER")
@@ -91,16 +101,17 @@ public class SecurityConfig {
         };
     }
 
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 
+
     @Bean
     static RoleHierarchy roleHierarchy() {
         RoleHierarchyImpl hierarchy = new RoleHierarchyImpl();
-        hierarchy.setHierarchy("ROLE_ADMIN > ROLE_USER\n" +
-                "ROLE_USER > ROLE_GUEST");
+        hierarchy.setHierarchy("ROLE_ADMIN > ROLE_USER\nROLE_USER > ROLE_GUEST");
         return hierarchy;
     }
 }

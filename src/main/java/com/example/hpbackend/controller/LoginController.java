@@ -17,6 +17,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextHolderStrategy;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
+import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -35,29 +36,6 @@ public class LoginController {
         this.authenticationManager = authenticationManager;
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request, HttpServletResponse response) {
-        try {
-           // response.setHeader("Access-Control-Allow-Origin", request.getHeader("Origin"));
-            UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(loginRequest.username(), loginRequest.password());
-            Authentication authentication = authenticationManager.authenticate(token);
-
-            SecurityContext context = securityContextHolderStrategy.createEmptyContext();
-            context.setAuthentication(authentication);
-            securityContextHolderStrategy.setContext(context);
-            securityContextRepository.saveContext(context, request, response);
-
-            Authentication authenticationResponse = SecurityContextHolder.getContext().getAuthentication();
-            if (authenticationResponse != null && authenticationResponse.isAuthenticated()) {
-                String username = authenticationResponse.getName();
-                return ResponseEntity.ok(new LoginResponse(username));
-            } else {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-            }
-        } catch (AuthenticationException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-        }
-    }
 
     @GetMapping("/currentuser")
     public ResponseEntity<String> getCurrentUser(HttpServletRequest request) {
@@ -69,7 +47,11 @@ public class LoginController {
         System.out.println("Current logged-in user: " + username);
         return ResponseEntity.ok().body("Current logged-in user: " + username);
     }
-
+    @GetMapping("/csrf-token")
+    public CsrfToken csrfToken(HttpServletRequest request) {
+        System.out.println(request.getAttribute(CsrfToken.class.getName()));
+        return (CsrfToken) request.getAttribute(CsrfToken.class.getName());
+    }
     public static class LoginResponse {
         private String username;
 
