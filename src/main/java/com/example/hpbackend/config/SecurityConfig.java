@@ -50,7 +50,8 @@ public class SecurityConfig {
                 .httpBasic(Customizer.withDefaults())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                );
+                )
+                .logout((logout) -> logout.logoutSuccessUrl("/home"));
         return http.build();
     }
 
