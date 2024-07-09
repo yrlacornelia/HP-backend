@@ -4,6 +4,7 @@ package com.example.hpbackend.config;
         import org.springframework.beans.factory.annotation.Autowired;
         import org.springframework.context.annotation.Bean;
         import org.springframework.context.annotation.Configuration;
+        import org.springframework.http.HttpMethod;
         import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
         import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
         import org.springframework.security.authentication.AuthenticationManager;
@@ -42,22 +43,21 @@ public class SecurityConfig {
         http
                 .cors(httpSecurityCorsConfigurer -> httpSecurityCorsConfigurer.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/home","/ws", "/login","/csrf-token", "/logout", "/**").permitAll()
+                        .requestMatchers("/", "/login", "/csrf-token", "/userLoggedIn").permitAll()
                         .anyRequest().authenticated()
                 )
+
                 .formLogin(form -> form
                         .loginPage("/login")
                         .permitAll()
                 )
                 .httpBasic(Customizer.withDefaults())
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                )
+
                 .logout(logout -> logout
-                        .logoutUrl("/logout") // Specify the logout URL
-                        .logoutSuccessUrl("/home") // Redirect URL after successful logout
-                        .invalidateHttpSession(true) // Invalidate the session
-                        .deleteCookies("JSESSIONID") // Delete cookies
+                        .logoutUrl("/logout")
+                        .permitAll()
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID")
                 );
 
         return http.build();
