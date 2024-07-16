@@ -4,7 +4,6 @@ package com.example.hpbackend.config;
         import org.springframework.beans.factory.annotation.Autowired;
         import org.springframework.context.annotation.Bean;
         import org.springframework.context.annotation.Configuration;
-        import org.springframework.http.HttpMethod;
         import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
         import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
         import org.springframework.security.authentication.AuthenticationManager;
@@ -20,8 +19,6 @@ package com.example.hpbackend.config;
         import org.springframework.security.crypto.factory.PasswordEncoderFactories;
         import org.springframework.security.crypto.password.PasswordEncoder;
         import org.springframework.security.web.SecurityFilterChain;
-        import org.springframework.security.web.csrf.CsrfTokenRepository;
-        import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
         import org.springframework.web.cors.CorsConfiguration;
         import org.springframework.web.cors.CorsConfigurationSource;
         import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -43,16 +40,15 @@ public class SecurityConfig {
         http
                 .cors(httpSecurityCorsConfigurer -> httpSecurityCorsConfigurer.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/", "/login", "/csrf-token", "/userLoggedIn").permitAll()
+                        .requestMatchers( "/login", "/csrf-token", "/logout","/userLoggedIn", "/").permitAll()
                         .anyRequest().authenticated()
                 )
-
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .formLogin(form -> form
                         .loginPage("/login")
                         .permitAll()
                 )
                 .httpBasic(Customizer.withDefaults())
-
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .permitAll()

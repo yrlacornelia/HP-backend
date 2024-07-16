@@ -1,30 +1,22 @@
 package com.example.hpbackend.controller;
-
-import com.example.hpbackend.dtos.EditUserForm;
-import com.example.hpbackend.entity.User;
 import com.example.hpbackend.repositories.UserRepository;
 import com.example.hpbackend.services.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextHolderStrategy;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
-import org.springframework.security.web.context.SecurityContextRepository;
+
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Objects;
 
 @RestController
@@ -42,20 +34,24 @@ public class LoginController {
     }
 
 
+    @GetMapping("/")
+    public ResponseEntity<?> home() {
+        return ResponseEntity.ok("{\"message\": \"Welcome to the API\"}");
+    }
     @GetMapping("/csrf-token")
     public CsrfToken csrfToken(HttpServletRequest request) {
-        System.out.println(request.getAttribute(CsrfToken.class.getName()));
         return (CsrfToken) request.getAttribute(CsrfToken.class.getName());
     }
     @GetMapping("/userLoggedIn")
-    public Boolean userLoggedIn(Principal principal) {
+    public ResponseEntity<?> checkUserLoggedIn(HttpServletRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated() && !(authentication instanceof AnonymousAuthenticationToken)) {
 
-        Collection<SimpleGrantedAuthority> authorities = (Collection<SimpleGrantedAuthority>)    SecurityContextHolder.getContext().getAuthentication().getAuthorities();
-System.out.println(authorities.toString());
-if(Objects.equals(authorities.toString(), "[ROLE_USER]"))
-    return true;
-else return false;
-
+            return ResponseEntity.ok().body(Map.of("loggedIn", true));
+        } else {
+            System.out.println("hello" + authentication);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("loggedIn", false));
+        }
     }
 
 }
