@@ -20,7 +20,6 @@ public class ImageUploader {
     public byte[] uploadImage() {
         try {
             Path imagePath = Path.of(resourceLoader.getResource("classpath:static/images/profile.jpeg").getURI());
-            System.out.println(Arrays.toString(Files.readAllBytes(imagePath)));
             return Files.readAllBytes(imagePath);
 
         } catch (IOException e) {

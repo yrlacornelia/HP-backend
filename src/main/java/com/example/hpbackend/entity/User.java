@@ -1,6 +1,5 @@
 package com.example.hpbackend.entity;
 
-
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
@@ -8,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -20,6 +20,7 @@ public class User implements Serializable {
 
     @Getter
     private String username;
+
     @Getter
     private String password;
 
@@ -31,7 +32,20 @@ public class User implements Serializable {
     @JoinColumn(name = "house_id")
     @JsonBackReference
     private House house;
+
+    @ManyToMany
+    @JoinTable(
+            name = "event_attendees",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "event_id")
+    )
+    private Set<Event> attendingEvents;
+
     public User() {
+    }
+
+    public User(String username) {
+        this.username = username;
     }
 
     public User(Long id, String username, String password) {
@@ -43,7 +57,6 @@ public class User implements Serializable {
     public void setPassword(String password) {
         this.password = password;
     }
-
 
     public void setUserName(String username) {
         this.username = username;

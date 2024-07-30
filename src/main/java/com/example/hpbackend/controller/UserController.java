@@ -11,12 +11,15 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 
 @RestController
@@ -44,8 +47,9 @@ public class UserController {
 
 
     @PostMapping("/createNewPerson")
-    public ResponseEntity<Void> createUser(@RequestBody User user) {
+    public ResponseEntity<?> createUser(@RequestBody User user) {
         if (user.getImageData() == null){
+
             user.setImageData(imageUploader.uploadImage());
         }
         userRepository.save(user);
@@ -75,19 +79,30 @@ public class UserController {
             return ResponseEntity.status(404).body("User not found");
         }
         user.setUserName(userForm.getUsername());
+
         userRepository.save(user);
+        Authentication request = new UsernamePasswordAuthenticationToken(userForm.getUsername(), user.getPassword());
+        Authentication result = authenticationManager.authenticate(request);
+        SecurityContextHolder.getContext().setAuthentication(result);
         return ResponseEntity.ok(user);
     }
 
     @PostMapping("/uploadProfileImage")
     public ResponseEntity<?> uploadProfileImage(@RequestParam("image") MultipartFile file) throws IOException {
-        String username = authService.getCurrentUser();
-        User user = userRepository.findByUsername(username);
-        if (user == null) {
-            return ResponseEntity.status(404).body("User not found");
+       System.out.println(file);
+       System.out.println("HELLO");
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No user is currently logged in");
         }
 
+        String username = authentication.getName();
+        System.out.println(authentication.getName());
+        User user = userRepository.findByUsername(username);
+        user.setImageData(file.getBytes());
         userRepository.save(user);
+        Path imagePath = Path.of(resourceLoader.getResource("classpath:static/images/profile.jpeg").getURI());
+        Files.readAllBytes(imagePath);
         return ResponseEntity.ok(user);
     }
     @GetMapping("/currentuser")
@@ -98,6 +113,21 @@ public class UserController {
         }
         String username = authentication.getName();
         System.out.println(authentication.getName());
+        System.out.println(authentication.getAuthorities());
+
+        User user = userRepository.findByUsername(username);
+        return ResponseEntity.ok().body(user);
+
+    }
+    @GetMapping("/currenRole")
+    public  ResponseEntity<Object>  getRole() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No user is currently logged in");
+        }
+        String username = authentication.getName();
+        System.out.println(authentication.getAuthorities());
+
         User user = userRepository.findByUsername(username);
         return ResponseEntity.ok().body(user);
 
