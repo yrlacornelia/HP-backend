@@ -135,6 +135,29 @@ public class UserController {
         return ResponseEntity.ok().body(user);
 
     }
+    @PostMapping("/setEvent")
+    public Event setEvent() {
+System.out.println("HELLO");
+/*        User user = userRepository.findByUsername("adminUser");
+        Event event = (Event) eventRepository.findById(1);
+
+      //  Event event = eventRepository.findById(1).orElseThrow(() -> new RuntimeException("Event not found"));
+     //   User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+
+        event.getAttendees().add(user);
+        user.getAttendingEvents().add(event);
+
+        userRepository.save(user);
+        return eventRepository.save(event);*/
+        Event event = (Event) eventRepository.findById(1);
+if(event.getAttendees() == null){
+    event.setAttendees(1L);
+}else {
+    event.setAttendees(event.getAttendees() + 1);
+}
+
+        return eventRepository.save(event);
+    }
 
 
 

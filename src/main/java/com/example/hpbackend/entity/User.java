@@ -33,6 +33,8 @@ public class User implements Serializable {
     @JsonBackReference
     private House house;
 
+
+/*
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "event_attendees",
@@ -40,6 +42,7 @@ public class User implements Serializable {
             inverseJoinColumns = @JoinColumn(name = "event_id")
     )
     private Set<Event> attendingEvents;
+*/
 
     public User() {
     }

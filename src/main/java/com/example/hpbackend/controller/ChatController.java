@@ -47,7 +47,6 @@ public class ChatController {
             chatMessage.setCreatedAt(LocalDateTime.now());
         }
 
-        // Save the message to the database
         ChatMessage savedMessage = chatMessageRepository.save(chatMessage);
         return dtoConverter.convertToChatMessageDTO(savedMessage);
     }
