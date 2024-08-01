@@ -1,17 +1,15 @@
 package com.example.hpbackend.controller;
 
+import com.example.hpbackend.dtos.ChatMessageDto;
+import com.example.hpbackend.dtos.dtoConverter;
 import com.example.hpbackend.entity.ChatMessage;
 import com.example.hpbackend.entity.User;
 import com.example.hpbackend.repositories.ChatMessageRepository;
 import com.example.hpbackend.repositories.UserRepository;
 import com.example.hpbackend.services.AuthService;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 
 import java.time.LocalDateTime;
@@ -40,7 +38,7 @@ public class ChatController {
     }
     @MessageMapping("/chat.sendMessage")
     @SendTo("/topic/public")
-    public ChatMessage sendMessage(
+    public ChatMessageDto sendMessage(
             @Payload ChatMessage chatMessage
     ) {
         Optional<User> user = Optional.ofNullable(userService.findByUsername(chatMessage.getSender().getUsername()));
@@ -50,8 +48,8 @@ public class ChatController {
         }
 
         // Save the message to the database
-        chatMessageRepository.save(chatMessage);
-        return chatMessage;
+        ChatMessage savedMessage = chatMessageRepository.save(chatMessage);
+        return dtoConverter.convertToChatMessageDTO(savedMessage);
     }
 
 

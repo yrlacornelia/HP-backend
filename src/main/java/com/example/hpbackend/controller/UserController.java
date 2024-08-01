@@ -2,10 +2,11 @@ package com.example.hpbackend.controller;
 
 import com.example.hpbackend.config.ImageUploader;
 import com.example.hpbackend.dtos.EditUserForm;
+import com.example.hpbackend.entity.Event;
+import com.example.hpbackend.repositories.EventRepository;
 import com.example.hpbackend.repositories.UserRepository;
 import com.example.hpbackend.entity.User;
 import com.example.hpbackend.services.AuthService;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpStatus;
@@ -32,13 +33,15 @@ public class UserController {
     private AuthenticationManager authenticationManager;
     private final ResourceLoader resourceLoader;
 
+    private final EventRepository eventRepository;
     private final AuthService authService;
     ImageUploader imageUploader;
 
-    public UserController(UserRepository userRepository, ImageUploader imageUploader, ResourceLoader resourceLoader, AuthService authService) {
+    public UserController(UserRepository userRepository, ImageUploader imageUploader, ResourceLoader resourceLoader, EventRepository eventRepository, AuthService authService) {
         this.userRepository = userRepository;
         this.imageUploader = imageUploader;
         this.resourceLoader = resourceLoader;
+        this.eventRepository = eventRepository;
         this.authService = authService;
     }
 
@@ -142,6 +145,11 @@ public class UserController {
     List<User> userList() {
         return userRepository.findAll();
     }
+    @GetMapping("/allEvents")
+    List<Event> eventList() {
+        return eventRepository.findAll();
+    }
+
 }
 
 

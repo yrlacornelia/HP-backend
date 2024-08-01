@@ -27,10 +27,11 @@ public class AdminController {
     private final AuthService authService;
     ImageUploader imageUploader;
 
-    private EventRepository eventRepository;
+    private final EventRepository eventRepository;
 
     public AdminController(UserRepository userRepository, ImageUploader imageUploader, EventRepository eventRepository,ResourceLoader resourceLoader, AuthService authService) {
         this.userRepository = userRepository;
+        this.eventRepository = eventRepository;
         this.imageUploader = imageUploader;
         this.resourceLoader = resourceLoader;
         this.authService = authService;

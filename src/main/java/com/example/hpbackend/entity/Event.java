@@ -3,6 +3,7 @@ package com.example.hpbackend.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -27,6 +28,7 @@ public class Event implements Serializable {
 
     @Getter
     @Setter
+    @CreationTimestamp
     private LocalDateTime startTime;
 
     @ManyToMany(mappedBy = "attendingEvents")
@@ -41,9 +43,7 @@ public class Event implements Serializable {
     public Event() {
     }
 
-    public void setStartTime(LocalDateTime startTime) {
-        this.startTime = startTime;
-    }
+
 
     public void setAttendees(Set<User> attendees) {
         this.attendees = attendees;

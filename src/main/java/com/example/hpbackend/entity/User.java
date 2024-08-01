@@ -33,7 +33,7 @@ public class User implements Serializable {
     @JsonBackReference
     private House house;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "event_attendees",
             joinColumns = @JoinColumn(name = "user_id"),
