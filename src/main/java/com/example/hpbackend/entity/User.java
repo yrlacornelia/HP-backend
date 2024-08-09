@@ -2,12 +2,14 @@ package com.example.hpbackend.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -18,10 +20,8 @@ public class User implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Getter
     private String username;
 
-    @Getter
     private String password;
 
     @Column(name = "image_data")
@@ -30,18 +30,22 @@ public class User implements Serializable {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "house_id")
-    @JsonBackReference
+    @JsonBackReference(value="house-user")
     private House house;
 
-
-/*
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "event_attendees",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "event_id")
     )
-    private Set<Event> attendingEvents;
+    @JsonManagedReference(value="user-event")
+    private List<Event> attendingEvents = new ArrayList<>();
+
+/*
+    @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonManagedReference(value = "chat-user")
+    private List<ChatMessage> chatMessages = new ArrayList<>();
 */
 
     public User() {
@@ -55,13 +59,5 @@ public class User implements Serializable {
         this.id = id;
         this.username = username;
         this.password = password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public void setUserName(String username) {
-        this.username = username;
     }
 }

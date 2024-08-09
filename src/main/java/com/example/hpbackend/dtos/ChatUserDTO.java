@@ -7,5 +7,5 @@ import lombok.Data;
 public class ChatUserDTO {
     private Long id;
     private String username;
-    private String imageData;
+//    private String imageData;
 }

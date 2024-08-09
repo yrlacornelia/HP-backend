@@ -81,7 +81,7 @@ public class UserController {
         if (user == null) {
             return ResponseEntity.status(404).body("User not found");
         }
-        user.setUserName(userForm.getUsername());
+        user.setUsername(userForm.getUsername());
 
         userRepository.save(user);
         Authentication request = new UsernamePasswordAuthenticationToken(userForm.getUsername(), user.getPassword());
@@ -136,27 +136,51 @@ public class UserController {
 
     }
     @PostMapping("/setEvent")
-    public Event setEvent() {
-System.out.println("HELLO");
-/*        User user = userRepository.findByUsername("adminUser");
-        Event event = (Event) eventRepository.findById(1);
+    public Event setEvent( @RequestParam("id") String eventid) {
 
-      //  Event event = eventRepository.findById(1).orElseThrow(() -> new RuntimeException("Event not found"));
-     //   User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        String username = authentication.getName();
+
+        User user = userRepository.findByUsername(username);
+        Event event = (Event) eventRepository.findById(Integer.parseInt(eventid));
+
 
         event.getAttendees().add(user);
         user.getAttendingEvents().add(event);
 
         userRepository.save(user);
-        return eventRepository.save(event);*/
-        Event event = (Event) eventRepository.findById(1);
-if(event.getAttendees() == null){
-    event.setAttendees(1L);
-}else {
-    event.setAttendees(event.getAttendees() + 1);
-}
-
         return eventRepository.save(event);
+
+    }
+    @GetMapping("/getevents")
+    public List<Event> getCurrentEvents() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+
+        User user = userRepository.findByUsername(username);
+
+        return userRepository.findById(user.getId())
+                .map(us -> user.getAttendingEvents())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+    }
+
+
+    @PostMapping("/removeEvent")
+    public ResponseEntity<?> removeEvent(@RequestParam("id") String eventid) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+
+        User user = userRepository.findByUsername(username);
+        Event event = (Event) eventRepository.findById(Integer.parseInt(eventid));
+
+        event.getAttendees().remove(user);
+            user.getAttendingEvents().remove(event);
+            userRepository.save(user);
+            eventRepository.save(event);
+            return ResponseEntity.ok("Event removed successfully");
+
     }
 
 

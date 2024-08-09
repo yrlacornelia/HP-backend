@@ -8,7 +8,7 @@ public class dtoConverter {
         ChatUserDTO userDTO = new ChatUserDTO();
         userDTO.setId(user.getId());
         userDTO.setUsername(user.getUsername());
-        userDTO.setImageData(user.getImageData() != null ? new String(user.getImageData()) : null);
+      //  userDTO.setImageData(user.getImageData() != null ? new String(user.getImageData()) : null);
         return userDTO;
     }
 
@@ -17,7 +17,17 @@ public class dtoConverter {
         chatMessageDTO.setId(chatMessage.getId());
         chatMessageDTO.setContent(chatMessage.getContent());
         chatMessageDTO.setCreatedAt(chatMessage.getCreatedAt());
-        chatMessageDTO.setSender(convertToUserDTO(chatMessage.getSender()));
+   chatMessageDTO.setSender(convertToUserDTO(chatMessage.getSender()));
         return chatMessageDTO;
+    }
+
+    public static ChatMessage convertToChatMessageEntity(ChatMessageDto chatMessageDto) {
+        ChatMessage chatMessage = new ChatMessage();
+
+        chatMessage.setId(chatMessageDto.getId());
+        chatMessage.setContent(chatMessageDto.getContent());
+        chatMessage.setCreatedAt(chatMessageDto.getCreatedAt());
+
+        return chatMessage;
     }
 }

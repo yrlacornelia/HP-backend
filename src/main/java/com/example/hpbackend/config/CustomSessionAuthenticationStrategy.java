@@ -18,16 +18,14 @@ public class CustomSessionAuthenticationStrategy implements SessionAuthenticatio
             throw new SessionAuthenticationException("Authentication object is null");
         }
 
-        // Invalidate the current session and create a new one
         request.getSession().invalidate();
         request.getSession(true);
 
-        // Add a custom cookie
         Cookie customCookie = new Cookie("customCookieName", "customCookieValue");
-        customCookie.setHttpOnly(true); // Make the cookie HTTP only for security
-        customCookie.setSecure(true); // Make the cookie secure if you're using HTTPS
-        customCookie.setPath("/"); // Set the path for the cookie
-        customCookie.setMaxAge(3600); // Set the maximum age of the cookie in seconds (1 hour)
+        customCookie.setHttpOnly(true);
+        customCookie.setSecure(true);
+        customCookie.setPath("/");
+        customCookie.setMaxAge(3600);
         response.addCookie(customCookie);
     }
 }

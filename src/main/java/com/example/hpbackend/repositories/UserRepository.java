@@ -1,5 +1,6 @@
 package com.example.hpbackend.repositories;
 
+import com.example.hpbackend.entity.Event;
 import com.example.hpbackend.entity.House;
 import com.example.hpbackend.entity.User;
 import org.springframework.data.repository.ListCrudRepository;
@@ -13,4 +14,6 @@ public interface UserRepository extends ListCrudRepository<User, Long> {
     List<User> findByHouseName(String houseName);
 
     String findByHouseId(House house);
+
+
 }

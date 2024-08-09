@@ -1,18 +1,21 @@
 package com.example.hpbackend.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
 @Entity
-public class Event {
+public class Event implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "id", nullable = false)
@@ -25,20 +28,9 @@ public class Event {
     @CreationTimestamp
     private LocalDateTime startTime;
 
- /*   @ManyToMany(mappedBy = "attendingEvents", fetch = FetchType.EAGER)
-    @JsonManagedReference
-    private Set<User> attendees;
-*/
- @Setter
- @Getter
- private Long attendees;
-
-    public Event(Long id, String title, String content, Long attendees) {
-        this.id = id;
-        this.title = title;
-        this.content = content;
-        this.attendees = attendees;
-    }
+    @ManyToMany(mappedBy = "attendingEvents", fetch = FetchType.LAZY)
+    @JsonBackReference(value="user-event")
+    private List<User> attendees = new ArrayList<>();
 
     public Event(Long id, String title, String content) {
         this.id = id;

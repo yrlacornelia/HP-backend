@@ -10,6 +10,7 @@ import com.example.hpbackend.services.AuthService;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 
 import java.time.LocalDateTime;
@@ -39,17 +40,26 @@ public class ChatController {
     @MessageMapping("/chat.sendMessage")
     @SendTo("/topic/public")
     public ChatMessageDto sendMessage(
-            @Payload ChatMessage chatMessage
+            @Payload ChatMessageDto chatMessageDto
     ) {
-        Optional<User> user = Optional.ofNullable(userService.findByUsername(chatMessage.getSender().getUsername()));
-        user.ifPresent(chatMessage::setSender);
+        System.out.println("Received Message: " + chatMessageDto);
+
+
+        Optional<User> userOptional = Optional.ofNullable(userService.findByUsername(chatMessageDto.getSender().getUsername()));
+        if (userOptional.isEmpty()) {
+                throw new UsernameNotFoundException("User not found: " + chatMessageDto.getSender().getUsername());
+        }
+        User sender = userOptional.get();
+System.out.println(sender);
+        ChatMessage chatMessage = dtoConverter.convertToChatMessageEntity(chatMessageDto);
+        chatMessage.setSender(sender);
+
         if (chatMessage.getCreatedAt() == null) {
             chatMessage.setCreatedAt(LocalDateTime.now());
         }
-
         ChatMessage savedMessage = chatMessageRepository.save(chatMessage);
+
         return dtoConverter.convertToChatMessageDTO(savedMessage);
     }
-
 
 }

@@ -22,7 +22,7 @@ public class House implements Serializable {
     private String name;
 
     @OneToMany(mappedBy = "house", fetch = FetchType.LAZY)
-    @JsonManagedReference
+    @JsonManagedReference(value="house-user")
     private List<User> users;
 
 
