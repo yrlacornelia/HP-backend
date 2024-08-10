@@ -194,8 +194,11 @@ public class UserController {
     }
     @GetMapping("/allEvents")
     List<Event> eventList() {
-        return eventRepository.findAll();
+        List<Event> events = eventRepository.findAllWithAttendees();
+        events.forEach(event -> System.out.println("Event: " + event.getTitle() + " Attendees: " + event.getAttendees().size()));
+        return events;
     }
+
 
 }
 

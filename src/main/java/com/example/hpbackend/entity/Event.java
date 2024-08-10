@@ -1,6 +1,7 @@
 package com.example.hpbackend.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -29,7 +30,7 @@ public class Event implements Serializable {
     private LocalDateTime startTime;
 
     @ManyToMany(mappedBy = "attendingEvents", fetch = FetchType.LAZY)
-    @JsonBackReference(value="user-event")
+    @JsonIgnoreProperties("attendingEvents") // Ignore the back reference to prevent infinite recursion
     private List<User> attendees = new ArrayList<>();
 
     public Event(Long id, String title, String content) {
